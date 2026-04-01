@@ -30,7 +30,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ### Environment variables
 
-The frontend reads from `.env.local` (already included):
+The frontend reads from `.env.local`:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:4000
@@ -100,11 +100,11 @@ Anti-cheat signals are tracked via `hooks/useAntiCheat.ts` and logged to the bac
 
 ### What is tracked
 
-| Event | Backend log | When |
-| --- | --- | --- |
-| Tab/window blur | `tab_blur on Q{n}` | User switches away from the page |
-| Tab/window focus | `tab_focus` | User returns to the page |
-| Paste | `paste_detected on Q{n}` | Paste action anywhere on the document |
+| Event            | Backend log              | When                                  |
+| ---------------- | ------------------------ | ------------------------------------- |
+| Tab/window blur  | `tab_blur on Q{n}`       | User switches away from the page      |
+| Tab/window focus | `tab_focus`              | User returns to the page              |
+| Paste            | `paste_detected on Q{n}` | Paste action anywhere on the document |
 
 All events include the active question number (`Q1`, `Q2`, etc.) so reviewers can see exactly where suspicious activity occurred.
 
