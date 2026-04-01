@@ -162,7 +162,7 @@ function QuizPlayerInner() {
 
 export function QuizPlayer() {
   return (
-    <Suspense>
+    <Suspense fallback={<div className="flex flex-1 items-center justify-center min-h-screen" />}>
       <QuizPlayerInner />
     </Suspense>
   )

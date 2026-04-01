@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Quiz Maker',
+  title: { default: 'Quiz Maker', template: '%s | Quiz Maker' },
   description: 'Create and take coding quizzes',
 }
 
