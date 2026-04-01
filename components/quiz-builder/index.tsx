@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { useMutation } from '@tanstack/react-query'
 import { ArrowLeft, Plus, Check, Copy, CheckCheck } from 'lucide-react'
@@ -61,45 +61,33 @@ export function QuizBuilder() {
     onSuccess: setSavedQuizId,
   })
 
-  const updateQuestion = useCallback(
-    (idx: number, patch: Partial<QuestionFormData>) =>
-      setQuestions((prev) => prev.map((q, i) => (i === idx ? { ...q, ...patch } : q))),
-    [],
-  )
+  const updateQuestion = (idx: number, patch: Partial<QuestionFormData>) =>
+    setQuestions((prev) => prev.map((q, i) => (i === idx ? { ...q, ...patch } : q)))
 
-  const updateOption = useCallback(
-    (qIdx: number, optIdx: number, value: string) =>
-      setQuestions((prev) =>
-        prev.map((q, i) => {
-          if (i !== qIdx) return q
-          const options = [...q.options]
-          options[optIdx] = value
-          return { ...q, options }
-        }),
-      ),
-    [],
-  )
+  const updateOption = (qIdx: number, optIdx: number, value: string) =>
+    setQuestions((prev) =>
+      prev.map((q, i) => {
+        if (i !== qIdx) return q
+        const options = [...q.options]
+        options[optIdx] = value
+        return { ...q, options }
+      }),
+    )
 
-  const addOption = useCallback(
-    (qIdx: number) =>
-      setQuestions((prev) =>
-        prev.map((q, i) => (i === qIdx ? { ...q, options: [...q.options, ''] } : q)),
-      ),
-    [],
-  )
+  const addOption = (qIdx: number) =>
+    setQuestions((prev) =>
+      prev.map((q, i) => (i === qIdx ? { ...q, options: [...q.options, ''] } : q)),
+    )
 
-  const removeOption = useCallback(
-    (qIdx: number, optIdx: number) =>
-      setQuestions((prev) =>
-        prev.map((q, i) => {
-          if (i !== qIdx) return q
-          const options = q.options.filter((_, j) => j !== optIdx)
-          const correctAnswer = q.correctAnswer === q.options[optIdx] ? '' : q.correctAnswer
-          return { ...q, options, correctAnswer }
-        }),
-      ),
-    [],
-  )
+  const removeOption = (qIdx: number, optIdx: number) =>
+    setQuestions((prev) =>
+      prev.map((q, i) => {
+        if (i !== qIdx) return q
+        const options = q.options.filter((_, j) => j !== optIdx)
+        const correctAnswer = q.correctAnswer === q.options[optIdx] ? '' : q.correctAnswer
+        return { ...q, options, correctAnswer }
+      }),
+    )
 
   const copyId = () => {
     if (savedQuizId === null) return

@@ -67,13 +67,10 @@ export function useAntiCheat(attemptId: number | null, getCurrentQuestion: () =>
     }
   }, [attemptId, logEvent])
 
-  const getSummary = useCallback(
-    (): AntiCheatSummary => ({
-      tabSwitches: [...tabSwitchesRef.current],
-      pastes: [...pastesRef.current],
-    }),
-    [],
-  )
+  const getSummary = (): AntiCheatSummary => ({
+    tabSwitches: [...tabSwitchesRef.current],
+    pastes: [...pastesRef.current],
+  })
 
   return { getSummary }
 }

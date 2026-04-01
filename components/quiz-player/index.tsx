@@ -6,7 +6,7 @@ import { api } from "@/lib/api";
 import type { Attempt, SubmitResult } from "@/lib/types";
 import { useMutation } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { QuestionView } from "./question-view";
 import { ResultsView } from "./results-view";
 import { StartScreen } from "./start-screen";
@@ -29,10 +29,7 @@ function QuizPlayerInner() {
 
   const attemptId = phase.status !== "idle" ? phase.attempt.id : null;
 
-  const getCurrentQuestion = useCallback(
-    () => `Q${currentIdxRef.current + 1}`,
-    [], // stable — reads from ref, no deps needed
-  );
+  const getCurrentQuestion = () => `Q${currentIdxRef.current + 1}`;
 
   const { getSummary } = useAntiCheat(attemptId, getCurrentQuestion);
 
@@ -79,40 +76,37 @@ function QuizPlayerInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const setAnswer = useCallback((questionId: number, value: string) => {
+  const setAnswer = (questionId: number, value: string) => {
     setPhase((prev) => {
       if (prev.status !== "active") return prev;
       return { ...prev, answers: { ...prev.answers, [questionId]: value } };
     });
-  }, []);
+  };
 
-  const navigate = useCallback(
-    (direction: "prev" | "next" | "submit") => {
-      if (phase.status !== "active") return;
-      const { currentIdx, answers, attempt } = phase;
-      const currentQ = attempt.quiz.questions[currentIdx];
-      const currentAnswer = answers[currentQ.id] ?? "";
+  const navigate = (direction: "prev" | "next" | "submit") => {
+    if (phase.status !== "active") return;
+    const { currentIdx, answers, attempt } = phase;
+    const currentQ = attempt.quiz.questions[currentIdx];
+    const currentAnswer = answers[currentQ.id] ?? "";
 
-      if (currentAnswer) {
-        saveAnswerMutation.mutate({ questionId: currentQ.id, value: currentAnswer });
-      }
+    if (currentAnswer) {
+      saveAnswerMutation.mutate({ questionId: currentQ.id, value: currentAnswer });
+    }
 
-      if (direction === "submit") {
-        submitMutation.mutate();
-      } else {
-        setPhase((prev) => {
-          if (prev.status !== "active") return prev;
-          return { ...prev, currentIdx: direction === "next" ? currentIdx + 1 : currentIdx - 1 };
-        });
-      }
-    },
-    [phase, saveAnswerMutation, submitMutation],
-  );
+    if (direction === "submit") {
+      submitMutation.mutate();
+    } else {
+      setPhase((prev) => {
+        if (prev.status !== "active") return prev;
+        return { ...prev, currentIdx: direction === "next" ? currentIdx + 1 : currentIdx - 1 };
+      });
+    }
+  };
 
-  const reset = useCallback(() => {
+  const reset = () => {
     setPhase({ status: "idle" });
     setQuizIdInput("");
-  }, []);
+  };
 
   if (phase.status === "idle") {
     return (
