@@ -1,115 +1,107 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { useMutation } from '@tanstack/react-query'
-import { ArrowLeft, Plus, Check, Copy, CheckCheck } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { QuestionCard } from './question-card'
-import { api } from '@/lib/api'
-import type { QuestionFormData } from '@/lib/types'
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { api } from "@/lib/api";
+import type { QuestionFormData } from "@/lib/types";
+import { useMutation } from "@tanstack/react-query";
+import { ArrowLeft, Check, CheckCheck, Copy, Plus } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+import { QuestionCard } from "./question-card";
 
 function makeQuestion(): QuestionFormData {
-  return { type: 'mcq', prompt: '', codeSnippet: '', options: ['', '', '', ''], correctAnswer: '' }
+  return { type: "mcq", prompt: "", codeSnippet: "", options: ["", "", "", ""], correctAnswer: "" };
 }
 
 function isQuestionValid(q: QuestionFormData): boolean {
-  if (!q.prompt.trim() || !q.correctAnswer.trim()) return false
-  if (q.type === 'mcq') {
-    const filled = q.options.filter((o) => o.trim())
-    return filled.length >= 2 && filled.includes(q.correctAnswer)
+  if (!q.prompt.trim() || !q.correctAnswer.trim()) return false;
+  if (q.type === "mcq") {
+    const filled = q.options.filter((o) => o.trim());
+    return filled.length >= 2 && filled.includes(q.correctAnswer);
   }
-  return true
+  return true;
 }
 
 export function QuizBuilder() {
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [questions, setQuestions] = useState<QuestionFormData[]>([makeQuestion()])
-  const [savedQuizId, setSavedQuizId] = useState<number | null>(null)
-  const [copied, setCopied] = useState(false)
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [questions, setQuestions] = useState<QuestionFormData[]>([makeQuestion()]);
+  const [savedQuizId, setSavedQuizId] = useState<number | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const saveQuiz = useMutation({
     mutationFn: async () => {
-      const quiz = await api.createQuiz({ title: title.trim(), description: description.trim() })
+      const quiz = await api.createQuiz({ title: title.trim(), description: description.trim() });
       for (const q of questions) {
-        const codeSnippet = q.codeSnippet.trim() || undefined
-        if (q.type === 'mcq') {
+        const codeSnippet = q.codeSnippet.trim() || undefined;
+        if (q.type === "mcq") {
           await api.addQuestion(quiz.id, {
-            type: 'mcq',
+            type: "mcq",
             prompt: q.prompt.trim(),
             codeSnippet,
             options: q.options.filter((o) => o.trim()),
             correctAnswer: q.correctAnswer,
-          })
+          });
         } else {
           await api.addQuestion(quiz.id, {
-            type: 'short',
+            type: "short",
             prompt: q.prompt.trim(),
             codeSnippet,
             correctAnswer: q.correctAnswer.trim(),
-          })
+          });
         }
       }
-      await api.publishQuiz(quiz.id)
-      return quiz.id
+      await api.publishQuiz(quiz.id);
+      return quiz.id;
     },
     onSuccess: setSavedQuizId,
-  })
+  });
 
-  const updateQuestion = (idx: number, patch: Partial<QuestionFormData>) =>
-    setQuestions((prev) => prev.map((q, i) => (i === idx ? { ...q, ...patch } : q)))
+  const updateQuestion = (idx: number, patch: Partial<QuestionFormData>) => setQuestions((prev) => prev.map((q, i) => (i === idx ? { ...q, ...patch } : q)));
 
   const updateOption = (qIdx: number, optIdx: number, value: string) =>
     setQuestions((prev) =>
       prev.map((q, i) => {
-        if (i !== qIdx) return q
-        const options = [...q.options]
-        options[optIdx] = value
-        return { ...q, options }
+        if (i !== qIdx) return q;
+        const options = [...q.options];
+        options[optIdx] = value;
+        return { ...q, options };
       }),
-    )
+    );
 
-  const addOption = (qIdx: number) =>
-    setQuestions((prev) =>
-      prev.map((q, i) => (i === qIdx ? { ...q, options: [...q.options, ''] } : q)),
-    )
+  const addOption = (qIdx: number) => setQuestions((prev) => prev.map((q, i) => (i === qIdx ? { ...q, options: [...q.options, ""] } : q)));
 
   const removeOption = (qIdx: number, optIdx: number) =>
     setQuestions((prev) =>
       prev.map((q, i) => {
-        if (i !== qIdx) return q
-        const options = q.options.filter((_, j) => j !== optIdx)
-        const correctAnswer = q.correctAnswer === q.options[optIdx] ? '' : q.correctAnswer
-        return { ...q, options, correctAnswer }
+        if (i !== qIdx) return q;
+        const options = q.options.filter((_, j) => j !== optIdx);
+        const correctAnswer = q.correctAnswer === q.options[optIdx] ? "" : q.correctAnswer;
+        return { ...q, options, correctAnswer };
       }),
-    )
+    );
 
   const copyId = () => {
-    if (savedQuizId === null) return
+    if (savedQuizId === null) return;
     navigator.clipboard.writeText(String(savedQuizId)).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    })
-  }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   const reset = () => {
-    setSavedQuizId(null)
-    setTitle('')
-    setDescription('')
-    setQuestions([makeQuestion()])
-    saveQuiz.reset()
-  }
+    setSavedQuizId(null);
+    setTitle("");
+    setDescription("");
+    setQuestions([makeQuestion()]);
+    saveQuiz.reset();
+  };
 
-  const canSubmit =
-    title.trim() !== '' &&
-    description.trim() !== '' &&
-    questions.length > 0 &&
-    questions.every(isQuestionValid)
+  const canSubmit = title.trim() !== "" && description.trim() !== "" && questions.length > 0 && questions.every(isQuestionValid);
 
   if (savedQuizId !== null) {
     return (
@@ -126,11 +118,7 @@ export function QuizBuilder() {
             <div className="flex items-center justify-center gap-3">
               <span className="text-5xl font-mono font-bold tracking-wide">{savedQuizId}</span>
               <Button variant="ghost" size="icon" onClick={copyId} aria-label="Copy quiz ID">
-                {copied ? (
-                  <CheckCheck className="h-5 w-5 text-green-600" />
-                ) : (
-                  <Copy className="h-5 w-5" />
-                )}
+                {copied ? <CheckCheck className="h-5 w-5 text-green-600" /> : <Copy className="h-5 w-5" />}
               </Button>
             </div>
             <div className="flex flex-col gap-2">
@@ -144,7 +132,7 @@ export function QuizBuilder() {
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   return (
@@ -166,24 +154,11 @@ export function QuizBuilder() {
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                placeholder="e.g. JavaScript Basics"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                disabled={saveQuiz.isPending}
-              />
+              <Input id="title" placeholder="e.g. JavaScript Basics" value={title} onChange={(e) => setTitle(e.target.value)} disabled={saveQuiz.isPending} />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                placeholder="What is this quiz about?"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={3}
-                disabled={saveQuiz.isPending}
-              />
+              <Textarea id="description" placeholder="What is this quiz about?" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} disabled={saveQuiz.isPending} />
             </div>
           </CardContent>
         </Card>
@@ -204,31 +179,17 @@ export function QuizBuilder() {
             />
           ))}
 
-          <Button
-            variant="outline"
-            onClick={() => setQuestions((prev) => [...prev, makeQuestion()])}
-            disabled={saveQuiz.isPending}
-            className="w-full gap-2"
-          >
+          <Button variant="outline" onClick={() => setQuestions((prev) => [...prev, makeQuestion()])} disabled={saveQuiz.isPending} className="w-full gap-2">
             <Plus className="h-4 w-4" /> Add Question
           </Button>
         </div>
 
-        {saveQuiz.isError && (
-          <p className="text-sm text-destructive text-center">
-            {(saveQuiz.error as Error).message}
-          </p>
-        )}
+        {saveQuiz.isError && <p className="text-sm text-destructive text-center">{(saveQuiz.error as Error).message}</p>}
 
-        <Button
-          className="w-full"
-          size="lg"
-          disabled={!canSubmit || saveQuiz.isPending}
-          onClick={() => saveQuiz.mutate()}
-        >
-          {saveQuiz.isPending ? 'Saving…' : 'Save & Publish Quiz'}
+        <Button className="w-full" size="lg" disabled={!canSubmit || saveQuiz.isPending} onClick={() => saveQuiz.mutate()}>
+          {saveQuiz.isPending ? "Saving…" : "Save & Publish Quiz"}
         </Button>
       </div>
     </div>
-  )
+  );
 }

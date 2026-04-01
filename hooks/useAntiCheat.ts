@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useRef, useCallback } from 'react'
 import { api } from '@/lib/api'
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 
 export interface TabSwitchEvent {
   question: string
@@ -33,7 +33,7 @@ export function useAntiCheat(attemptId: number | null, getCurrentQuestion: () =>
 
   const logEvent = useCallback((eventName: string) => {
     if (attemptIdRef.current !== null) {
-      api.trackEvent(attemptIdRef.current, eventName).catch(() => {})
+      api.trackEvent(attemptIdRef.current, eventName).catch(() => { })
     }
   }, [])
 
